@@ -11,6 +11,8 @@ final class PalettePanel: NSPanel {
 
     /// Bare backspace, which the field editor swallows before `onKeyPress` could see it.
     var onBareBackspace: (() -> Bool)?
+    /// Bare space, which the field editor inserts as text before `onKeyPress` could see it.
+    var onBareSpace: (() -> Bool)?
     /// Escape, which an `AVPlayerView` in the preview answers before `onKeyPress` could see it.
     var onEscape: (() -> Bool)?
     /// Command chords the field editor swallows, plus the ones no main menu handles.
@@ -217,6 +219,13 @@ final class PalettePanel: NSPanel {
             event.modifierFlags.isDisjoint(with: [.command, .option, .control, .shift]),
             fieldEditor?.hasMarkedText() != true,
             onBareBackspace?() == true
+        {
+            return
+        }
+        if event.type == .keyDown,
+            Int(event.keyCode) == kVK_Space,
+            event.modifierFlags.isDisjoint(with: [.command, .option, .control, .shift]),
+            onBareSpace?() == true
         {
             return
         }
