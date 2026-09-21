@@ -190,7 +190,7 @@ struct LauncherScreen: PaletteScreen {
         Quicklink.id(fromEntryID: entry.id).flatMap(core.quicklinks.quicklink)
     }
 
-    private func entry(at selection: Int) -> AppEntry? {
+    func entry(at selection: Int) -> AppEntry? {
         guard case .entry(let app) = row(at: selection) else { return nil }
         return app
     }
