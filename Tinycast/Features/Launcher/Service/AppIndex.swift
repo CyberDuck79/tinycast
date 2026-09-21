@@ -722,6 +722,10 @@ final class AppIndex {
             aliasRevision: aliases.revision, sensitivity: sensitivity)
     }
 
+    /// The user's own alias for an entry, if any — `signals(for:usage:)` reads the same store to
+    /// score a match, but this is the direct lookup a caller with an entry already in hand needs.
+    func userAlias(for entry: AppEntry) -> String? { aliases.alias(for: entry.preferenceKey) }
+
     private func rank(_ q: String, limit: Int) -> [AppEntry] {
         Signposts.interval("AppIndex.rank") {
             let usage = ranking.snapshot()

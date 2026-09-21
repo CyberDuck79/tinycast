@@ -314,6 +314,7 @@ struct RootPaletteView: View {
                     WindowReader {
                         hostWindow = $0
                         installHeaderArrowHandler(in: $0)
+                        installBareSpaceHandler(in: $0)
                     }
                 )
                 // The window's frame is the size source, so the glass and clip stay matched.
@@ -450,6 +451,7 @@ struct RootPaletteView: View {
             .onDisappear {
                 menuPanel.hide()
                 (hostWindow as? PalettePanel)?.onHeaderFieldBoundaryArrow = nil
+                (hostWindow as? PalettePanel)?.onBareSpace = nil
             }
             // The first show builds this view after `prepare`, so no handler saw that reset.
             .onAppear {
@@ -1355,6 +1357,26 @@ struct RootPaletteView: View {
             case .trailing:
                 advanceTabFocus(backwards: false)
             }
+            return true
+        }
+    }
+
+    /// A typed user alias always ranks its entry first (`userAlias · exact` in `SearchRelevance`),
+    /// so Space can complete it early, the way Raycast's aliases do. Handled at the panel because
+    /// the field editor inserts a bare space as text before `onKeyPress` would ever see it.
+    private func installBareSpaceHandler(in window: NSWindow?) {
+        guard let panel = window as? PalettePanel else { return }
+        panel.onBareSpace = {
+            guard !menuOpen, !vm.isComposing, !vm.isEditingField, searchFocused, !isCollapsed,
+                !vm.query.isEmpty, vm.mode == .launcher
+            else { return false }
+            let screen = screen
+            guard let launcher = screen as? LauncherScreen,
+                let entry = launcher.entry(at: selection(in: screen)),
+                let alias = appIndex.userAlias(for: entry),
+                FuzzyMatch.normalized(alias) == FuzzyMatch.normalized(vm.query)
+            else { return false }
+            activateSelection()
             return true
         }
     }
