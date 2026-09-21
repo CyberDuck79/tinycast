@@ -652,6 +652,10 @@ final class AppIndex {
         }
     }
 
+    /// The user's own alias for an entry, if any — `AppEntry.aliases` never carries it, since
+    /// `rank` only folds it into the transient `SearchFields` a scoring pass builds.
+    func userAlias(for entry: AppEntry) -> String? { aliases.alias(for: entry.preferenceKey) }
+
     private func rank(_ q: String, limit: Int) -> [AppEntry] {
         Signposts.interval("AppIndex.rank") {
             let learned = ranking.usage(query: q)
